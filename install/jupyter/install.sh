@@ -54,7 +54,15 @@ conda run --prefix "$TARGET_PREFIX" jupyter kernelspec remove sysml -f > /dev/nu
 if [ "$CREATE_ENV" = true ]; then
     conda create --prefix "$TARGET_PREFIX" "jupyter-sysml-kernel=$SYSML_VERSION" python=3.* jupyterlab=3.* graphviz=2.* nodejs="<17" -c conda-forge -y
 else
-    conda install --prefix "$TARGET_PREFIX" "jupyter-sysml-kernel=$SYSML_VERSION" python=3.* jupyterlab=3.* graphviz=2.* nodejs="<17" -c conda-forge -y
+    SYSML_KERNEL_DIR="$TARGET_PREFIX/share/jupyter/kernels/sysml"
+    SYSML_KERNEL_JAR="$SYSML_KERNEL_DIR/jupyter-sysml-kernel-${SYSML_VERSION}-all.jar"
+    FORCE_REINSTALL=""
+    if [ ! -f "$SYSML_KERNEL_JAR" ]; then
+        echo "Existing SysML kernel files not found at: $SYSML_KERNEL_JAR"
+        echo "Forcing reinstall to restore the kernel artifacts."
+        FORCE_REINSTALL="--force-reinstall"
+    fi
+    conda install --prefix "$TARGET_PREFIX" $FORCE_REINSTALL "jupyter-sysml-kernel=$SYSML_VERSION" python=3.* jupyterlab=3.* graphviz=2.* nodejs="<17" -c conda-forge -y
 fi
 
 echo "--- Step 3b: Registering SysML kernel with Jupyter ---"
